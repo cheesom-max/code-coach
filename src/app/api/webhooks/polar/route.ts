@@ -6,6 +6,13 @@ import {
   handleOrderPaid,
 } from '@/lib/payments/polar'
 
+// P0-3: Validate webhook secret at module load time
+if (!process.env.POLAR_WEBHOOK_SECRET) {
+  throw new Error('POLAR_WEBHOOK_SECRET environment variable is required')
+}
+
+const WEBHOOK_SECRET = process.env.POLAR_WEBHOOK_SECRET
+
 export async function POST(request: Request) {
   try {
     const body = await request.text()
@@ -21,7 +28,7 @@ export async function POST(request: Request) {
       event = validateEvent(
         body,
         headers,
-        process.env.POLAR_WEBHOOK_SECRET || ''
+        WEBHOOK_SECRET
       )
     } catch (error) {
       if (error instanceof WebhookVerificationError) {
